@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ftd4linux_website/!svn/ver/15/gentoo/net-nntp/openftd/files
+END
+openftd-0.99.2.myftd.mod.fix.patch
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/ftd4linux_website/!svn/ver/15/gentoo/net-nntp/openftd/files/openftd-0.99.2.myftd.mod.fix.patch
+END
+openftd-0.99.2.myftd.debug.patch
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/ftd4linux_website/!svn/ver/14/gentoo/net-nntp/openftd/files/openftd-0.99.2.myftd.debug.patch
+END
+digest-openftd-0.98.6
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/ftd4linux_website/!svn/ver/9/gentoo/net-nntp/openftd/files/digest-openftd-0.98.6
+END

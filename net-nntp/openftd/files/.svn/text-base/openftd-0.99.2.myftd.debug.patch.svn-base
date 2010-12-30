@@ -1,0 +1,25 @@
+Index: ftd_core/src/ftd_myftd.c
+===================================================================
+--- ftd_core/src/ftd_myftd.c	(revision 1120)
++++ ftd_core/src/ftd_myftd.c	(working copy)
+@@ -217,6 +217,8 @@
+         cur = cur->next;
+     }
+ 
++g_print("event->mod = %i\n", event->mod);
++
+     return;
+ }
+ 
+Index: gui/src/ftd_gui_center_myftd.c
+===================================================================
+--- gui/src/ftd_gui_center_myftd.c	(revision 1120)
++++ gui/src/ftd_gui_center_myftd.c	(working copy)
+@@ -251,6 +251,7 @@
+         return retval;
+     }
+ 
++g_print("myftd reply: %s\n", ftd_string_value(uitvoer));
+     retval = ftd_myftd_parse(uitvoer, &list);
+     if (retval != 0) {
+         ftd_string_free(uitvoer);

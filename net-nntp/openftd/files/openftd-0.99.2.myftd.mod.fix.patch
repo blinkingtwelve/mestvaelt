@@ -1,0 +1,17 @@
+Index: ftd_core/src/ftd_myftd.c
+===================================================================
+--- ftd_core/src/ftd_myftd.c	(revision 1120)
++++ ftd_core/src/ftd_myftd.c	(working copy)
+@@ -211,7 +211,11 @@
+             event->rating = ftd_xml_parse_int(doc, cur);
+         }
+         if (!strcasecmp(cur->name, "Mod")) {
+-            event->mod = ftd_xml_parse_int(doc, cur);
++            if (ftd_xml_parse_int(doc, cur) == 0) {
++                event->mod = TRUE;  // Post moet beoordeeld worden door een modje
++            } else {
++                event->mod = FALSE; // Geauthenticeerd poster
++            }
+         }
+ // FIXME: Komen hier ook nog tags aan te pas ?
+         cur = cur->next;
