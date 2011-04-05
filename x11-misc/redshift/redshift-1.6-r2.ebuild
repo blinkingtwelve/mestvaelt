@@ -35,7 +35,7 @@ pkg_setup() {
 src_unpack() {
 	unpack ${A}
 	cd "${S}"
-	epatch "${FILESDIR}"/no-orphan.patch
+	epatch "${FILESDIR}"/"${PF}-no_orphan.patch"
 }
 
 src_prepare() {
