@@ -1,11 +1,19 @@
 --- src/gtk-redshift/statusicon.py.orig	2011-04-05 11:03:20.888460529 +0200
-+++ src/gtk-redshift/statusicon.py	2011-04-05 11:05:10.765086886 +0200
-@@ -40,6 +40,18 @@
++++ src/gtk-redshift/statusicon.py	2011-04-05 12:53:06.587783456 +0200
+@@ -26,6 +26,7 @@
+ import sys, os
+ import subprocess, signal
+ import gettext
++import atexit
+ 
+ import pygtk
+ pygtk.require("2.0")
+@@ -40,6 +41,18 @@
  import utils
  
  
 +def create_janitor(process):
-+	def janitor(signum, frame):
++	def janitor(signum=None, frame=None):
 +		try:
 +			process.terminate()
 +			process.wait()
@@ -19,18 +27,20 @@
  def run():
      # Internationalisation
      gettext.bindtextdomain('redshift', defs.LOCALEDIR)
-@@ -127,8 +139,9 @@
+@@ -127,8 +140,11 @@
          def child_cb(pid, cond, data=None):
              sys.exit(-1)
  
 -        # Add watch on child process
 +        # Add watch on child process, register cleanup function
          glib.child_watch_add(process.pid, child_cb)
-+        signal.signal(signal.SIGTERM, create_janitor(process))
++        janitor = create_janitor(process)
++        atexit.register(janitor)
++        signal.signal(signal.SIGTERM, janitor)
  
          # Run main loop
          gtk.main()
-@@ -136,8 +149,3 @@
+@@ -136,8 +152,3 @@
      except KeyboardInterrupt:
          # Ignore user interruption
          pass
