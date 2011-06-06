@@ -1,0 +1,80 @@
+--- contrib/dspam_maintenance/dspam_maintenance.sh.orig	2010-01-16 15:43:59.000000000 +0100
++++ contrib/dspam_maintenance/dspam_maintenance.sh	2010-01-16 16:14:46.000000000 +0100
+@@ -58,6 +58,7 @@
+ # Function to run dspam_clean
+ #
+ run_dspam_clean() {
++	echo "Running dspam_clean"
+ 	local PURGE_SIG="${1}"
+ 	if [ "${PURGE_SIG}" == "YES" ]
+ 	then
+@@ -107,6 +108,7 @@
+ 	#
+ 	# MySQL
+ 	#
++	echo "Running MySQL data cleanup"
+ 	if	${USE_SQL_PURGE} && \
+ 		read_dspam_params MySQLServer MySQLPort MySQLUser MySQLPass MySQLDb MySQLCompress && \
+ 		[ -n "${MySQLServer}" -a -n "${MySQLUser}" -a -n "${MySQLDb}" ]
+@@ -185,6 +187,7 @@
+ 	#
+ 	# PostgreSQL
+ 	#
++	echo "Running PgSQL data cleanup"
+ 	if	${USE_SQL_PURGE} && \
+ 		read_dspam_params PgSQLServer PgSQLPort PgSQLUser PgSQLPass PgSQLDb && \
+ 		[ -n "${PgSQLServer}" -a -n "${PgSQLUser}" -a -n "${PgSQLDb}" ]
+@@ -192,8 +195,8 @@
+ 		DSPAM_PgSQL_PURGE_SQL=""
+ 		if [ -f "${DSPAM_CONFIGDIR}/config/config/pgsql_pe-purge.sql" -o -f "${DSPAM_CONFIGDIR}/pgsql_pe-purge.sql" ]
+ 		then
+-			[ -f "${DSPAM_CONFIGDIR}/config/pgsql_pe-purge.sql" ] && DSPAM_MySQL_PURGE_SQL="${DSPAM_CONFIGDIR}/config/pgsql_pe-purge.sql"
+-			[ -f "${DSPAM_CONFIGDIR}/pgsql_pe-purge.sql" ] && DSPAM_MySQL_PURGE_SQL="${DSPAM_CONFIGDIR}/pgsql_pe-purge.sql"
++			[ -f "${DSPAM_CONFIGDIR}/config/pgsql_pe-purge.sql" ] && DSPAM_PgSQL_PURGE_SQL="${DSPAM_CONFIGDIR}/config/pgsql_pe-purge.sql"
++			[ -f "${DSPAM_CONFIGDIR}/pgsql_pe-purge.sql" ] && DSPAM_PgSQL_PURGE_SQL="${DSPAM_CONFIGDIR}/pgsql_pe-purge.sql"
+ 		else
+ 			[ -f "${DSPAM_CONFIGDIR}/config/pgsql_purge.sql" ] && DSPAM_PgSQL_PURGE_SQL="${DSPAM_CONFIGDIR}/config/pgsql_purge.sql"
+ 			[ -f "${DSPAM_CONFIGDIR}/pgsql_purge.sql" ] && DSPAM_PgSQL_PURGE_SQL="${DSPAM_CONFIGDIR}/pgsql_purge.sql"
+@@ -238,6 +241,7 @@
+ 	#
+ 	# Hash
+ 	#
++	echo "Running Hash data cleanup"
+ 	if [ -d "${DSPAM_HOMEDIR}/data" ]
+ 	then
+ 		if [ -e ${DSPAM_BIN_DIR}/cssclean ]
+@@ -267,6 +271,7 @@
+ 	#
+ 	# SQLite3
+ 	#
++	echo "Running SQLite3 data cleanup"
+ 	if	${USE_SQL_PURGE}
+ 	then
+ 		DSPAM_SQLite3_PURGE_SQL=""
+@@ -307,6 +312,7 @@
+ 	#
+ 	# SQLite
+ 	#
++	echo "Running SQLite data cleanup"
+ 	if	${USE_SQL_PURGE}
+ 	then
+ 		DSPAM_SQLite_PURGE_SQL=""
+@@ -476,6 +482,7 @@
+ 	#
+ 	# System and user log purging
+ 	#
++	echo "Running dspam_logrotate"
+ 	if [ ! -e "${DSPAM_BIN_DIR}/dspam_logrotate" ]
+ 	then
+ 		echo "dspam_logrotate not found! Can not continue without it."
+@@ -491,7 +498,9 @@
+ 	#
+ 	# Process all available storage drivers
+ 	#
+-	for foo in $(${DSPAM_BIN_DIR}/dspam --version 2>&1 | sed -n "s:,: :g;s:^.*\-\-with\-storage\-driver=\([^\']*\).*:\1:gIp")
++	DRIVERS=$(${DSPAM_BIN_DIR}/dspam --version 2>&1 | sed -n "s:,: :g;s:^.*\-\-with\-storage\-driver=\([^\']*\).*:\1:gIp" | tr " " "\n" | sort | uniq | tr "\n" " ")
++	echo "Starting cleanup for drivers: $DRIVERS"
++	for foo in $DRIVERS
+ 	do
+ 		case "${foo}" in
+ 			hash_drv)
