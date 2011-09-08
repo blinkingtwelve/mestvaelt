@@ -1,0 +1,38 @@
+diff -Naur PyBluez-0.18.orig/bluetooth/__init__.py PyBluez-0.18/bluetooth/__init__.py
+--- PyBluez-0.18.orig/bluetooth/__init__.py	2009-11-24 09:39:49.000000000 +0100
++++ PyBluez-0.18/bluetooth/__init__.py	2011-09-08 12:33:50.903239842 +0200
+@@ -30,10 +30,12 @@
+         _dbg("Widcomm not ready. falling back to MS stack")
+         from msbt import *
+ 
+-elif sys.platform == "linux2":
++elif sys.platform.startswith("linux"):
+     from bluez import *
+ elif sys.platform == "darwin":
+     from osx import *
++else:
++    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
+ 
+ discover_devices.__doc__ = \
+     """
+diff -Naur PyBluez-0.18.orig/setup.py PyBluez-0.18/setup.py
+--- PyBluez-0.18.orig/setup.py	2011-09-08 12:33:31.519906807 +0200
++++ PyBluez-0.18/setup.py	2011-09-08 12:36:03.343237805 +0200
+@@ -46,7 +46,7 @@
+                 )
+         mods.append (mod2)
+     
+-elif sys.platform == 'linux2':
++elif sys.platform.startswith('linux'):
+     mod1 = Extension('bluetooth._bluetooth',
+ 		                 libraries = ['bluetooth'],
+                          sources = ['bluez/btmodule.c', 'bluez/btsdp.c'])
+@@ -59,6 +59,8 @@
+                      sources = ['osx/_osxbt.c']
+                      )
+     mods = [ mod1 ]
++else:
++    raise Exception("This platform (%s) is currently not supported by pybluez." % sys.platform)
+ 
+ 
+ setup (	name = 'PyBluez',
