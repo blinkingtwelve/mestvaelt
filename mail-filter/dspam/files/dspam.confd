@@ -1,6 +1,0 @@
-# /etc/conf.d/dspam
-# Change this to the user:group you want to run the dspam daemon as.
-# If you need dspam to switch uids, this is root:root.
-# If you use virtual users and deliver via LMTP, this can be nonprivileged such as dspam:dspam.
-
-DSPAM_USER_GROUP=""
