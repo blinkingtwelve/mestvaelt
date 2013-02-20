@@ -1,13 +1,13 @@
 EAPI="4"
 
 DESCRIPTION="Highly efficient file backup system based on the git packfile format"
-HOMEPAGE="https://github.com/apenwarr/bup"
+HOMEPAGE="https://github.com/bup/bup"
 if [[ ${PV} != *9999* ]]; then
-	SRC_URI="https://github.com/apenwarr/${PN}/tarball/${P/_/-} -> ${P}.tar.gz"
+	SRC_URI="https://github.com/bup/${PN}/tarball/${P/_/-} -> ${P}.tar.gz"
 	KEYWORDS="~amd64 ~x86"
 else
         inherit git-2
-        EGIT_REPO_URI="git://github.com/apenwarr/bup.git"
+        EGIT_REPO_URI="git://github.com/bup/bup.git"
         KEYWORDS=""
 fi
 
