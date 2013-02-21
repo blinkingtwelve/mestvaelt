@@ -1,5 +1,7 @@
 EAPI="4"
 
+inherit eutils
+
 DESCRIPTION="Highly efficient file backup system based on the git packfile format"
 HOMEPAGE="https://github.com/bup/bup"
 if [[ ${PV} != *9999* ]]; then
@@ -35,6 +37,11 @@ src_unpack() {
 	else
 		git-2_src_unpack
 	fi
+}
+
+src_prepare() {
+	cd ${WORKDIR}
+	epatch ${FILESDIR}/whysostrict.patch
 }
 
 src_configure() {
