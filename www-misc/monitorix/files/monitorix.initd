@@ -1,0 +1,19 @@
+#!/sbin/runscript
+
+depend() {
+	need localmount
+}
+
+start() {
+	ebegin "Starting monitorix"
+	start-stop-daemon --start --exec /usr/bin/monitorix \
+	-- -c /etc/monitorix.conf -p /var/run/monitorix.pid
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping monitorix"
+	start-stop-daemon --stop --pidfile /var/run/monitorix.pid
+	eend $?
+}
+
