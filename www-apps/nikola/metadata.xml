@@ -14,5 +14,8 @@
 	<flag name='markdown'>
       Add support for Markdown as alternative markup language to reStructuredText
     </flag>
+	<flag name='assets'>
+      Add support for web asset management through dev-python/assets
+    </flag>
   </use>
 </pkgmetadata>
