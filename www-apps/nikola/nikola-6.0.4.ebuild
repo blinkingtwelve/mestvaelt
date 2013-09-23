@@ -55,7 +55,7 @@ src_install() {
 }
 
 pkg_postinst() {
-	if has_version '<www-apps/nikola-5.0'; then
+	if has_version '<www-apps/nikola-6.0'; then
 		elog 'Nikola has changed quite a lot since the previous major version.'
 		elog 'Please make sure to read the updated documentation.'
 	fi
