@@ -16,14 +16,13 @@ if [[ ${PV} == *9999* ]]; then
 	EGIT_REPO_URI="git://github.com/ralsina/${PN}.git"
 	KEYWORDS=""
 else
-	SRC_URI="http://nikola-generator.googlecode.com/files/${P}.zip"
 	SRC_URI="mirror://pypi/${MY_PN:0:1}/${MY_PN}/${P}.tar.gz"
 	KEYWORDS="~amd64"
 fi
 
 LICENSE="MIT-with-advertising"
 SLOT="0"
-IUSE="jinja markdown assets"
+IUSE="jinja markdown assets charts"
 
 DEPEND="dev-python/docutils" # needs rst2man to build manpage
 RDEPEND="${DEPEND}
@@ -41,6 +40,7 @@ RDEPEND="${DEPEND}
 	>=dev-python/pytz-2013d
 	dev-python/python-dateutil
 	assets? ( dev-python/assets )
+	charts? ( dev-python/pygal )
 	jinja? ( >=dev-python/jinja-2.7 )
 	markdown? ( dev-python/markdown )"
 

@@ -17,5 +17,8 @@
 	<flag name='assets'>
       Add support for web asset management through dev-python/assets
     </flag>
+	<flag name='charts'>
+      Add support for chart generation through dev-python/pygal
+    </flag>
   </use>
 </pkgmetadata>
