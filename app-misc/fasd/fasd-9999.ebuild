@@ -8,7 +8,7 @@ inherit git-2
 
 DESCRIPTION="Fasd keeps track of files and directories you have accessed, so
 that you can quickly reference them in the command line."
-HOMEPAGE="https://github.com/clvv/fas"
+HOMEPAGE="https://github.com/clvv/fasd"
 EGIT_REPO_URI="https://github.com/clvv/fasd.git"
 
 
