@@ -4,7 +4,7 @@
 
 EAPI=5
 
-PYTHON_COMPAT=( python{2_7,3_2} )
+PYTHON_COMPAT=( python{2_7,3_3} )
 
 #if LIVE
 # Note: we ignore submodules since we use btrfs-progs-9999.
