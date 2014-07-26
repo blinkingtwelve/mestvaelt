@@ -1,0 +1,234 @@
+diff -Naur mercurial-server-1.3.orig/setup.py mercurial-server-1.3/setup.py
+--- mercurial-server-1.3.orig/setup.py	2012-08-24 14:52:12.000000000 +0200
++++ mercurial-server-1.3/setup.py	2014-07-26 20:43:51.008153883 +0200
+@@ -11,7 +11,7 @@
+     package_dir = {'': 'src'},
+     packages = ["mercurialserver"],
+     requires = ["mercurial"], # FIXME: what version?
+-    scripts = ['src/hg-ssh', 'src/refresh-auth'],
++    scripts = ['src/hgserver-ssh', 'src/refresh-auth'],
+     data_files = [
+         ('init', [
+             'src/init/hginit',
+diff -Naur mercurial-server-1.3.orig/src/hg-ssh mercurial-server-1.3/src/hg-ssh
+--- mercurial-server-1.3.orig/src/hg-ssh	2012-08-24 14:52:12.000000000 +0200
++++ mercurial-server-1.3/src/hg-ssh	1970-01-01 01:00:00.000000000 +0100
+@@ -1,101 +0,0 @@
+-#!/usr/bin/env python
+-
+-"""
+-hg-ssh - limit access to hg repositories reached via ssh.  Part of
+-mercurial-server.
+-
+-It is called by ssh due to an entry in the authorized_keys file,
+-with the name for the key passed on the command line.
+-
+-It uses SSH_ORIGINAL_COMMAND to determine what the user was trying to
+-do and to what repository, and then checks each rule in the rule file
+-in turn for a matching rule which decides what to do, defaulting to
+-disallowing the action.
+-
+-"""
+-
+-# enable importing on demand to reduce startup time
+-from mercurial import demandimport; demandimport.enable()
+-
+-from mercurial import dispatch
+-
+-try:
+-    request = dispatch.request
+-except AttributeError:
+-    request = list
+-
+-import sys, os, os.path
+-import base64
+-from mercurialserver import config, ruleset
+-
+-def fail(message):
+-    sys.stderr.write("mercurial-server: %s\n" % message)
+-    sys.exit(-1)
+-
+-config.initExe()
+-
+-for k,v in config.getEnv():
+-    os.environ[k.upper()] = v
+-
+-if len(sys.argv) == 3 and sys.argv[1] == "--base64":
+-    ruleset.rules.set(user = base64.b64decode(sys.argv[2]))
+-elif len(sys.argv) == 2:
+-    ruleset.rules.set(user = sys.argv[1])
+-else:
+-    fail("hg-ssh wrongly called, is authorized_keys corrupt? (%s)"
+-        % sys.argv)
+-
+-os.chdir(config.getReposPath())
+-
+-for f in config.getAccessPaths():
+-    if os.path.isfile(f):
+-        ruleset.rules.readfile(f)
+-
+-alloweddots = config.getAllowedDots()
+-
+-def dotException(pathtail):
+-    for ex in alloweddots:
+-        splex = ex.split("/")
+-        if len(pathtail) >= len(splex) and pathtail[:len(splex)] == splex:
+-            return True
+-    return False
+-
+-def checkDots(path, pathtail = []):
+-    head, tail = os.path.split(path)
+-    pathtail = [tail] + pathtail
+-    if tail.startswith(".") and not dotException(pathtail):
+-            fail("paths cannot contain dot file components")
+-    if head:
+-        checkDots(head, pathtail)
+-
+-def getrepo(op, repo):
+-    # First canonicalise, then check the string, then the rules
+-    repo = repo.strip().rstrip("/")
+-    if len(repo) == 0:
+-        fail("path to repository seems to be empty")
+-    if repo.startswith("/"):
+-        fail("absolute paths are not supported")
+-    checkDots(repo)
+-    ruleset.rules.set(repo=repo)
+-    if not ruleset.rules.allow(op, branch=None, file=None):
+-        fail("access denied")
+-    return repo
+-
+-cmd = os.environ.get('SSH_ORIGINAL_COMMAND', None)
+-if cmd is None:
+-    fail("direct logins on the hg account prohibited")
+-elif cmd.startswith('hg -R ') and cmd.endswith(' serve --stdio'):
+-    repo = getrepo("read", cmd[6:-14])
+-    if not os.path.isdir(repo + "/.hg"):
+-        fail("no such repository %s" % repo)
+-    dispatch.dispatch(request(['-R', repo, 'serve', '--stdio']))
+-elif cmd.startswith('hg init '):
+-    repo = getrepo("init", cmd[8:])
+-    if os.path.exists(repo):
+-        fail("%s exists" % repo)
+-    d = os.path.dirname(repo)
+-    if d != "" and not os.path.isdir(d):
+-        os.makedirs(d)
+-    dispatch.dispatch(request(['init', repo]))
+-else:
+-    fail("illegal command %r" % cmd)
+diff -Naur mercurial-server-1.3.orig/src/hgserver-ssh mercurial-server-1.3/src/hgserver-ssh
+--- mercurial-server-1.3.orig/src/hgserver-ssh	1970-01-01 01:00:00.000000000 +0100
++++ mercurial-server-1.3/src/hgserver-ssh	2014-07-26 20:45:01.481649593 +0200
+@@ -0,0 +1,101 @@
++#!/usr/bin/env python
++
++"""
++hgserver-ssh - limit access to hg repositories reached via ssh.  Part of
++mercurial-server.
++
++It is called by ssh due to an entry in the authorized_keys file,
++with the name for the key passed on the command line.
++
++It uses SSH_ORIGINAL_COMMAND to determine what the user was trying to
++do and to what repository, and then checks each rule in the rule file
++in turn for a matching rule which decides what to do, defaulting to
++disallowing the action.
++
++"""
++
++# enable importing on demand to reduce startup time
++from mercurial import demandimport; demandimport.enable()
++
++from mercurial import dispatch
++
++try:
++    request = dispatch.request
++except AttributeError:
++    request = list
++
++import sys, os, os.path
++import base64
++from mercurialserver import config, ruleset
++
++def fail(message):
++    sys.stderr.write("mercurial-server: %s\n" % message)
++    sys.exit(-1)
++
++config.initExe()
++
++for k,v in config.getEnv():
++    os.environ[k.upper()] = v
++
++if len(sys.argv) == 3 and sys.argv[1] == "--base64":
++    ruleset.rules.set(user = base64.b64decode(sys.argv[2]))
++elif len(sys.argv) == 2:
++    ruleset.rules.set(user = sys.argv[1])
++else:
++    fail("hgserver-ssh wrongly called, is authorized_keys corrupt? (%s)"
++        % sys.argv)
++
++os.chdir(config.getReposPath())
++
++for f in config.getAccessPaths():
++    if os.path.isfile(f):
++        ruleset.rules.readfile(f)
++
++alloweddots = config.getAllowedDots()
++
++def dotException(pathtail):
++    for ex in alloweddots:
++        splex = ex.split("/")
++        if len(pathtail) >= len(splex) and pathtail[:len(splex)] == splex:
++            return True
++    return False
++
++def checkDots(path, pathtail = []):
++    head, tail = os.path.split(path)
++    pathtail = [tail] + pathtail
++    if tail.startswith(".") and not dotException(pathtail):
++            fail("paths cannot contain dot file components")
++    if head:
++        checkDots(head, pathtail)
++
++def getrepo(op, repo):
++    # First canonicalise, then check the string, then the rules
++    repo = repo.strip().rstrip("/")
++    if len(repo) == 0:
++        fail("path to repository seems to be empty")
++    if repo.startswith("/"):
++        fail("absolute paths are not supported")
++    checkDots(repo)
++    ruleset.rules.set(repo=repo)
++    if not ruleset.rules.allow(op, branch=None, file=None):
++        fail("access denied")
++    return repo
++
++cmd = os.environ.get('SSH_ORIGINAL_COMMAND', None)
++if cmd is None:
++    fail("direct logins on the hg account prohibited")
++elif cmd.startswith('hg -R ') and cmd.endswith(' serve --stdio'):
++    repo = getrepo("read", cmd[6:-14])
++    if not os.path.isdir(repo + "/.hg"):
++        fail("no such repository %s" % repo)
++    dispatch.dispatch(request(['-R', repo, 'serve', '--stdio']))
++elif cmd.startswith('hg init '):
++    repo = getrepo("init", cmd[8:])
++    if os.path.exists(repo):
++        fail("%s exists" % repo)
++    d = os.path.dirname(repo)
++    if d != "" and not os.path.isdir(d):
++        os.makedirs(d)
++    dispatch.dispatch(request(['init', repo]))
++else:
++    fail("illegal command %r" % cmd)
+diff -Naur mercurial-server-1.3.orig/src/mercurialserver/refreshauth.py mercurial-server-1.3/src/mercurialserver/refreshauth.py
+--- mercurial-server-1.3.orig/src/mercurialserver/refreshauth.py	2012-08-24 14:52:12.000000000 +0200
++++ mercurial-server-1.3/src/mercurialserver/refreshauth.py	2014-07-26 20:44:17.734883753 +0200
+@@ -13,7 +13,7 @@
+ 
+ def refreshAuth():
+     akeyfile = config.getAuthorizedKeysPath()
+-    wrappercommand = config.getExePath() + "/hg-ssh"
++    wrappercommand = config.getExePath() + "/hgserver-ssh"
+     prefix='no-pty,no-port-forwarding,no-X11-forwarding,no-agent-forwarding,command='
+ 
+     if os.path.exists(akeyfile):
