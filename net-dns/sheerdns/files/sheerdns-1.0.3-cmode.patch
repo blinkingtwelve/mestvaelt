@@ -1,26 +1,26 @@
-diff -Naur sheerdns.orig/dir.h sheerdns/dir.h
---- sheerdns.orig/dir.h	2003-04-12 10:04:59.000000000 +0200
-+++ sheerdns/dir.h	2010-12-29 20:02:21.118916669 +0100
+diff -Naur sheerdns.old/dir.h sheerdns/dir.h
+--- sheerdns.old/dir.h	2003-04-12 10:04:59.000000000 +0200
++++ sheerdns/dir.h	2014-11-30 14:31:56.388624171 +0100
 @@ -12,3 +12,4 @@
  time_t get_mtime (int qtype, unsigned char *s);
  
  #define SHEERDNS_DIR	"/var/sheerdns"
 +#define SHEERDNS_CMODE	0770
-diff -Naur sheerdns.orig/hash.c sheerdns/hash.c
---- sheerdns.orig/hash.c	2010-12-29 20:01:38.595583335 +0100
-+++ sheerdns/hash.c	2010-12-29 20:02:49.248916668 +0100
-@@ -28,7 +28,7 @@
+diff -Naur sheerdns.old/hash.c sheerdns/hash.c
+--- sheerdns.old/hash.c	2003-04-12 10:04:59.000000000 +0200
++++ sheerdns/hash.c	2014-11-30 14:32:37.625291603 +0100
+@@ -25,7 +25,7 @@
  	unsigned char *s;
  	s = (unsigned char *) hex_hash ((unsigned char *) argv[1]);
  	snprintf (buf, sizeof (buf), SHEERDNS_DIR "/%s/%s", s, argv[1]);
--	mkdir (buf, 0700);
+-	mkdir (buf);
 +	mkdir (buf, SHEERDNS_CMODE);
  	l = strlen ((char *) s);
  	write (1, s, l);
  	write (1, "\n", 1); }
-diff -Naur sheerdns.orig/sheerdns.c sheerdns/sheerdns.c
---- sheerdns.orig/sheerdns.c	2010-12-29 20:01:38.598916669 +0100
-+++ sheerdns/sheerdns.c	2010-12-29 20:02:21.118916669 +0100
+diff -Naur sheerdns.old/sheerdns.c sheerdns/sheerdns.c
+--- sheerdns.old/sheerdns.c	2005-02-10 21:37:51.000000000 +0100
++++ sheerdns/sheerdns.c	2014-11-30 14:31:56.388624171 +0100
 @@ -583,25 +583,25 @@
      const char *hex = "0123456789ABCDEF";
      char path[256];
