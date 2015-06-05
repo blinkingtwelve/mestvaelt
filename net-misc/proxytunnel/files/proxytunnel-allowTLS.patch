@@ -1,0 +1,12 @@
+diff -Naur proxytunnel-1.9.1.orig/ptstream.c proxytunnel-1.9.1/ptstream.c
+--- proxytunnel-1.9.1.orig/ptstream.c	2012-01-23 19:13:41.000000000 +0100
++++ proxytunnel-1.9.1/ptstream.c	2015-06-05 11:18:54.256668390 +0200
+@@ -151,7 +151,7 @@
+ 	
+ 	/* Initialise the connection */
+ 	SSLeay_add_ssl_algorithms();
+-	meth = SSLv3_client_method();
++	meth = SSLv23_client_method();
+ 	SSL_load_error_strings();
+ 
+ 	ctx = SSL_CTX_new (meth);
