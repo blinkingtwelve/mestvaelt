@@ -3,7 +3,6 @@
 # $Header: /var/cvsroot/gentoo-x86/dev-vcs/mercurial-server/mercurial-server-1.2.ebuild,v 1.4 2012/12/26 23:17:35 ottxor Exp $
 
 EAPI="5"
-PYTHON_DEPEND="2"
 PYTHON_COMPAT=( python2_7 )
 
 inherit distutils-r1 eutils user
