@@ -3,26 +3,32 @@
 
 EAPI=7
 
-PYTHON_COMPAT=( python3_7 )
-inherit python-single-r1 xdg-utils
+PYTHON_COMPAT=( python3_{6,7,8,9} )
+inherit python-single-r1 xdg
 
-if [[ ${PV} = *9999* ]]; then
+if [[ ${PV} == "9999" ]]; then
 	inherit git-r3
 	EGIT_REPO_URI="https://github.com/exaile/exaile.git"
 else
 	SRC_URI="https://github.com/${PN}/${PN}/archive/${PV/_/-}/${PN}-${PV/_/}.tar.gz"
-	KEYWORDS="amd64 x86"
+	KEYWORDS="~amd64 ~x86"
 	S="${WORKDIR}/${PN}-${PV/_/-}"
 fi
 
 DESCRIPTION="GTK+ based media player aiming to be similar to Amarok"
 HOMEPAGE="https://www.exaile.org/"
-
 LICENSE="GPL-2 GPL-3"
 SLOT="0"
+# IUSE+=cddb if have dev-python/cddb-py
 IUSE="libnotify nls scrobbler"
 REQUIRED_USE="${PYTHON_REQUIRED_USE}"
 
+BDEPEND="
+	nls? (
+		dev-util/intltool
+		sys-devel/gettext
+	)
+"
 RDEPEND="${PYTHON_DEPS}
 	>=media-libs/gst-plugins-base-1.6:1.0
 	>=media-libs/gst-plugins-good-1.4:1.0
@@ -39,20 +45,12 @@ RDEPEND="${PYTHON_DEPS}
 		scrobbler? ( dev-python/pylast[${PYTHON_MULTI_USEDEP}] )
 	')
 "
-BDEPEND="
-	nls? (
-		dev-util/intltool
-		sys-devel/gettext
-	)
-"
 
 RESTRICT="test" #315589
 
-
 PATCHES=(
-	"${FILESDIR}/${P}-metainfo.patch"
+#	"${FILESDIR}/${P}-metainfo.patch"
 )
-
 
 pkg_setup() {
 	python-single-r1_pkg_setup
@@ -71,14 +69,4 @@ src_install() {
 
 	python_optimize "${D}/usr/$(get_libdir)/${PN}"
 	python_optimize "${D}/usr/share/${PN}"
-}
-
-pkg_postinst() {
-	xdg_desktop_database_update
-	xdg_mimeinfo_database_update
-}
-
-pkg_postrm() {
-	xdg_desktop_database_update
-	xdg_mimeinfo_database_update
 }
