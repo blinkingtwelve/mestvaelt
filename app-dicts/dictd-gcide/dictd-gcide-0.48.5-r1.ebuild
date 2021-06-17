@@ -25,6 +25,6 @@ src_compile() {
 }
 
 src_install() {
-	insinto /usr/lib/dict
+	insinto /usr/share/dict
 	doins gcide.dict.dz gcide.index || die
 }
