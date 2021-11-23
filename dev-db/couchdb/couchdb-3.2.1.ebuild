@@ -20,8 +20,6 @@ RDEPEND=">=dev-libs/icu-69.1
 		dev-lang/spidermonkey:78
 		!libressl? ( dev-libs/openssl:0 )
 		libressl? ( dev-libs/libressl )
-		net-misc/curl
-		selinux? ( sec-policy/selinux-couchdb )
 		sys-process/psmisc
 "
 
@@ -43,7 +41,7 @@ pkg_setup() {
 src_configure() {
 	econf \
 		--with-erlang="${EPREFIX}"/usr/$(get_libdir)/erlang/usr/include \
-		--with-curl \
+		--spidermonkey-version 78 \
 		--user=couchdb
 }
 
