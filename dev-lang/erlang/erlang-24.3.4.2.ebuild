@@ -1,10 +1,10 @@
-# Copyright 1999-2020 Gentoo Authors
+# Copyright 1999-2022 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
-WX_GTK_VER="3.0"
+WX_GTK_VER="3.0-gtk3"
 
-inherit elisp-common java-pkg-opt-2 systemd wxwidgets
+inherit elisp-common flag-o-matic java-pkg-opt-2 systemd toolchain-funcs wxwidgets
 
 # NOTE: If you need symlinks for binaries please tell maintainers or
 # open up a bug to let it be created.
@@ -14,16 +14,16 @@ UPSTREAM_V="$(ver_cut 1-2)"
 DESCRIPTION="Erlang programming language, runtime environment and libraries (OTP)"
 HOMEPAGE="https://www.erlang.org/"
 SRC_URI="https://github.com/erlang/otp/archive/OTP-${PV}.tar.gz -> ${P}.tar.gz
-	http://erlang.org/download/otp_doc_man_${UPSTREAM_V}.tar.gz -> ${PN}_doc_man_${UPSTREAM_V}.tar.gz
-	doc? ( http://erlang.org/download/otp_doc_html_${UPSTREAM_V}.tar.gz -> ${PN}_doc_html_${UPSTREAM_V}.tar.gz )"
+	https://github.com/erlang/otp/releases/download/OTP-${UPSTREAM_V}/otp_doc_man_${UPSTREAM_V}.tar.gz -> ${PN}_doc_man_${UPSTREAM_V}.tar.gz
+	doc? ( https://github.com/erlang/otp/releases/download/OTP-${UPSTREAM_V}/otp_doc_html_${UPSTREAM_V}.tar.gz -> ${PN}_doc_html_${UPSTREAM_V}.tar.gz )"
 
 LICENSE="Apache-2.0"
 # We use this subslot because Compiled HiPE Code can be loaded on the exact
 # same build of ERTS that was used when compiling the code.  See
 # http://erlang.org/doc/system_principles/misc.html for more information.
 SLOT="0/${PV}"
-KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~ia64 ~ppc ~ppc64 ~sparc ~x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x86-macos ~x64-solaris"
-IUSE="doc emacs +hipe java +kpoll libressl odbc sctp ssl systemd tk wxwidgets"
+KEYWORDS="amd64 ~arm ~arm64 ~hppa ~ia64 ppc ppc64 ~riscv sparc x86 ~amd64-linux ~x86-linux ~ppc-macos ~x64-macos ~x64-solaris"
+IUSE="doc emacs java +kpoll odbc sctp ssl systemd tk wxwidgets"
 
 RDEPEND="
 	acct-group/epmd
@@ -34,10 +34,7 @@ RDEPEND="
 	java? ( >=virtual/jdk-1.8:* )
 	odbc? ( dev-db/unixODBC )
 	sctp? ( net-misc/lksctp-tools )
-	ssl? (
-		!libressl? ( >=dev-libs/openssl-0.9.7d:0= )
-		libressl? ( dev-libs/libressl:0= )
-	)
+	ssl? ( >=dev-libs/openssl-0.9.7d:0= )
 	systemd? ( sys-apps/systemd )
 	wxwidgets? ( x11-libs/wxGTK:${WX_GTK_VER}[X,opengl] )
 "
@@ -48,8 +45,8 @@ DEPEND="${RDEPEND}
 S="${WORKDIR}/otp-OTP-${PV}"
 
 PATCHES=(
-	"${FILESDIR}/18.2.1-wx3.0.patch"
-	"${FILESDIR}/${PN}-22.0-dont-ignore-LDFLAGS.patch"
+	"${FILESDIR}"/${PN}-22.0-dont-ignore-LDFLAGS.patch
+	"${FILESDIR}"/${PN}-24.0.2-serial-configure.patch
 )
 
 SITEFILE=50"${PN}"-gentoo.el
@@ -57,7 +54,11 @@ SITEFILE=50"${PN}"-gentoo.el
 src_prepare() {
 	default
 
-	./otp_build autoconf || die
+	tc-export AR CPP CXX LD
+
+	# bug #797886: erlang's VM does unsafe casts for ints
+	# to pointers and back. This breaks on gcc-11 -flto.
+	append-flags -fno-strict-aliasing
 }
 
 src_configure() {
@@ -65,11 +66,14 @@ src_configure() {
 
 	local myconf=(
 		--disable-builtin-zlib
-		$(use_enable hipe)
+
+		# don't search for static zlib
+		--with-ssl-zlib=no
+
 		$(use_enable kpoll kernel-poll)
 		$(use_with java javac)
 		$(use_enable sctp)
-		$(use_with ssl ssl "${EPREFIX}"/usr)
+		$(use_with ssl ssl)
 		$(use_enable ssl dynamic-ssl-lib)
 		$(use_enable systemd)
 		$(usex wxwidgets "--with-wx-config=${WX_CONFIG}" "--with-wxdir=/dev/null")
