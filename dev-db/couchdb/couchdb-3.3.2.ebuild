@@ -3,7 +3,7 @@
 
 EAPI=7
 
-inherit eutils multilib pax-utils
+inherit multilib pax-utils
 
 DESCRIPTION="Distributed, fault-tolerant and schema-free document-oriented database"
 HOMEPAGE="https://couchdb.apache.org/"
@@ -14,18 +14,17 @@ SLOT="0"
 KEYWORDS="~amd64 ~ppc ~x86"
 IUSE="libressl selinux test"
 
-RDEPEND=">=dev-libs/icu-69.1
-		>dev-lang/erlang-20
-		<dev-lang/erlang-25
-		dev-lang/spidermonkey:78
+RDEPEND=">=dev-libs/icu-72.1
+		>=dev-lang/erlang-23
+		<dev-lang/erlang-26
+		dev-lang/spidermonkey:91
 		!libressl? ( dev-libs/openssl:0 )
 		libressl? ( dev-libs/libressl )
 		sys-process/psmisc
 "
 
 DEPEND="${RDEPEND}
-		>=dev-util/rebar-2.6.4
-		<dev-util/rebar-3.0.0
+		dev-util/rebar:3
 		sys-devel/autoconf-archive
 "
 
@@ -36,7 +35,7 @@ S="${WORKDIR}/apache-${P}"
 src_configure() {
 	econf \
 		--with-erlang="${EPREFIX}"/usr/$(get_libdir)/erlang/usr/include \
-		--spidermonkey-version 78 \
+		--spidermonkey-version 91 \
 		--user=couchdb
 }
 
