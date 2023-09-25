@@ -1,0 +1,75 @@
+--- Impressive-0.13.1.old/impressive.py	2022-03-19 13:47:40.000000000 +0100
++++ Impressive-0.13.1/impressive.py	2023-08-24 12:43:25.183476554 +0100
+@@ -2076,7 +2076,7 @@
+         img = ImageOps.equalize(ImageOps.autocontrast(img))
+         for i in range(self.blur):
+             img = img.filter(ImageFilter.BLUR)
+-        img = img.crop((border, border, img.size[0] - 2 * border, img.size[1] - 2 * border)).resize((self.rx, self.ry), Image.ANTIALIAS)
++        img = img.crop((border, border, img.size[0] - 2 * border, img.size[1] - 2 * border)).resize((self.rx, self.ry), Image.Resampling.LANCZOS)
+         return img2str(img)
+ class WipeBrightness1(Wipe):
+     """wipe based on the current slide's brightness"""
+@@ -2283,13 +2283,9 @@
+         self.index_buffer_capacity = 0
+ 
+     def AddCharacter(self, c):
+-        w, h = self.font.getsize(c)
+-        try:
+-            ox, oy = self.font.getoffset(c)
+-            w += ox
+-            h += oy
+-        except AttributeError:
+-            pass
++        ox, oy, w, h = self.font.getbbox(c)
++        w += ox
++        h += oy
+         self.line_height = max(self.line_height, h)
+         size = (w + 2 * self.feather, h + 2 * self.feather)
+         glyph = Image.new('L', size)
+@@ -3505,16 +3501,16 @@
+     # downsample a supersampled image
+     if Supersample and not(ZoomMode):
+         img = img.resize((int(float(out[0]) / Supersample + 0.5),
+-                          int(float(out[1]) / Supersample + 0.5)), Image.ANTIALIAS)
++                          int(float(out[1]) / Supersample + 0.5)), Image.Resampling.LANCZOS)
+         parscale = False  # don't scale again
+ 
+     # perform PAR scaling (required for pdftoppm which doesn't support different
+     # dpi for horizontal and vertical)
+     if parscale:
+         if PAR > 1.0:
+-            img = img.resize((int(img.size[0] / PAR + 0.5), img.size[1]), Image.ANTIALIAS)
++            img = img.resize((int(img.size[0] / PAR + 0.5), img.size[1]), Image.Resampling.LANCZOS)
+         else:
+-            img = img.resize((img.size[0], int(img.size[1] * PAR + 0.5)), Image.ANTIALIAS)
++            img = img.resize((img.size[0], int(img.size[1] * PAR + 0.5)), Image.Resampling.LANCZOS)
+ 
+     # crop the overscan (if present)
+     if Overscan:
+@@ -3567,7 +3563,7 @@
+     if newsize > img.size:
+         filter = Image.BICUBIC
+     else:
+-        filter = Image.ANTIALIAS
++        filter = Image.Resampling.LANCZOS
+     return img.resize(newsize, filter)
+ 
+ 
+@@ -3703,7 +3699,7 @@
+                 sy = OverviewCellY - 2 * OverviewBorder
+                 if HighQualityOverview:
+                     t0 = time.time()
+-                    img.thumbnail((sx, sy), Image.ANTIALIAS)
++                    img.thumbnail((sx, sy), Image.Resampling.LANCZOS)
+                     if (time.time() - t0) > 0.5:
+                         print("Note: Your system seems to be quite slow; falling back to a faster,", file=sys.stderr)
+                         print("      but slightly lower-quality overview page rendering mode", file=sys.stderr)
+@@ -6409,7 +6405,7 @@
+         if (dummy.size[0] > maxsize[0]) or (dummy.size[1] > maxsize[1]):
+             size = ZoomToFit(dummy.size, maxsize, force_int=True)
+             if min(size) > 0:
+-                dummy.thumbnail(size, Image.ANTIALIAS)
++                dummy.thumbnail(size, Image.Resampling.LANCZOS)
+             else:
+                 dummy = None
+         if dummy:
