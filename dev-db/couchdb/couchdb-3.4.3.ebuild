@@ -15,8 +15,8 @@ KEYWORDS="~amd64 ~ppc ~x86"
 IUSE="test doc man"
 
 RDEPEND="
-		>=dev-libs/icu-75.1
-		>=dev-lang/erlang-25
+		>=dev-libs/icu-76.1
+		>=dev-lang/erlang-26.2.4
 		<dev-lang/erlang-28
 		dev-libs/openssl:0
 		sys-process/psmisc
